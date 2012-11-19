@@ -28,5 +28,39 @@ namespace MetroImml.Framework
 
             throw new MarkupException("Document does not contain the specified background element");
         }
+
+        public static SharpDX.Matrix GetCameraMatrixOrDefault(this ImmlDocument document, SharpDX.Matrix defaultValue)
+        {
+            if (string.IsNullOrWhiteSpace(document.Camera))
+            {
+                return defaultValue;
+            }
+
+            Camera cameraElement = null;
+
+            if (document.TryGetElementByName<Camera>(document.Camera, out cameraElement))
+            {
+                return cameraElement.Matrix.ToSharpDxMatrix();
+            }
+
+            throw new MarkupException("Document does not contain the specified camera element");
+        }
+
+        public static Camera GetActiveCamera(this ImmlDocument document)
+        {
+            if (string.IsNullOrWhiteSpace(document.Camera))
+            {
+                return null;
+            }
+
+            Camera cameraElement = null;
+
+            if (document.TryGetElementByName<Camera>(document.Camera, out cameraElement))
+            {
+                return cameraElement;
+            }
+
+            return null;
+        }
     }
 }
