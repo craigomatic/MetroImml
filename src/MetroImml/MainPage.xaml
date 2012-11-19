@@ -3,10 +3,14 @@
     IsTabStop="false"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:converter="using:MetroImml.Converters"
     xmlns:local="using:MetroImml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
+    <Page.Resources>
+        <converter:StringFormatConverter x:Name="StringFormatConverter" />
+    </Page.Resources>
     
     <Page.TopAppBar>
         <AppBar>
@@ -25,13 +29,13 @@
     </Page.TopAppBar>
         
 
-    <Grid Background="{StaticResource ApplicationPageBackgroundThemeBrush}">
+    <Grid Background="{StaticResource ApplicationPageBackgroundThemeBrush}" PointerPressed="Grid_PointerPressed_1" PointerReleased="Grid_PointerReleased_1" PointerMoved="Grid_PointerMoved_1">
         <Grid.RowDefinitions>
             <RowDefinition />
             <RowDefinition Height="150"/>
         </Grid.RowDefinitions>
-        
-        <Rectangle x:Name="RenderTarget" Height="618" Width="1366" />
-    
+       
+        <Rectangle x:Name="RenderTarget" Loaded="RenderTarget_Loaded" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" />
+        <TextBlock Grid.Row="1" Text="{Binding SelectedDocument.TargetView.View.TranslationVector, Converter={StaticResource StringFormatConverter}, ConverterParameter='{}Camera Position: {0}'}" Foreground="White" FontSize="16" Margin="10" />
     </Grid>
 </Page>

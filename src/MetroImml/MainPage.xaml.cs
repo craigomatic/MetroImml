@@ -21,6 +21,9 @@ using Windows.UI.Xaml.Controls.Primitives;
 using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Navigation;
+using Imml;
+using Imml.Scene.Controls;
+using Windows.UI.Input;
 
 // The Blank Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=234238
 
@@ -35,7 +38,7 @@ namespace MetroImml
         private DeviceManager _DeviceManager;
         private SurfaceImageSourceTarget _SurfaceImageSourceTarget;
 
-        private ImmlContextRenderer<ImmlDocument> _ContextRenderer;
+        private IRenderStrategy _ContextRenderer;
 
         public MainPage()
         {
@@ -45,7 +48,7 @@ namespace MetroImml
             (App.ViewModel.OpenCommand as CommandBase).ExecuteDelegate = e => _OpenFile();
             (App.ViewModel.SaveCommand as CommandBase).ExecuteDelegate = e => _SaveFile();
 
-            _ContextRenderer = new ImmlContextRenderer<ImmlDocument>(new DocumentRenderStrategy<ImmlDocument>());
+            _ContextRenderer = new RenderStrategy();
             this.DataContext = App.ViewModel;
         }        
 
@@ -59,22 +62,7 @@ namespace MetroImml
             _D3dBrush = new Windows.UI.Xaml.Media.ImageBrush();
             this.RenderTarget.Fill = _D3dBrush;
 
-            _DeviceManager = new DeviceManager();
-
-            var pixelWidth = (int)(this.RenderTarget.Width * DisplayProperties.LogicalDpi / 96.0);
-            var pixelHeight = (int)(this.RenderTarget.Height * DisplayProperties.LogicalDpi / 96.0);
-
-            _SurfaceImageSourceTarget = new SurfaceImageSourceTarget(pixelWidth, pixelHeight);
-            _SurfaceImageSourceTarget.OnRender += _SurfaceImageSourceTarget_OnRender;
-            _D3dBrush.ImageSource = _SurfaceImageSourceTarget.ImageSource;
-
-            _DeviceManager.OnInitialize += _DeviceManager_OnInitialize;
-
-            _DeviceManager.Initialize(DisplayProperties.LogicalDpi);
-
-            Windows.UI.Xaml.Media.CompositionTarget.Rendering += CompositionTarget_Rendering;
-
-            DisplayProperties.LogicalDpiChanged += DisplayProperties_LogicalDpiChanged;
+            _DeviceManager = new DeviceManager();            
         }
 
         void _SurfaceImageSourceTarget_OnRender(TargetBase render)
@@ -86,6 +74,7 @@ namespace MetroImml
         {
             try
             {
+                App.ViewModel.SelectedDocument.TargetView = _ContextRenderer.TargetView;
                 _SurfaceImageSourceTarget.RenderAll();
             }
             catch { }
@@ -103,10 +92,15 @@ namespace MetroImml
 
         private async void _NewFile()
         {
-            var immlDoc = new ImmlDocument();
-            App.ViewModel.SelectedDocument = new ImmlDocumentViewModel(immlDoc);
+            var immlDocument = new ImmlDocument();
+            App.ViewModel.SelectedDocument = new ImmlDocumentViewModel(immlDocument);
 
-            _ContextRenderer.Initialise(immlDoc);
+            _ContextRenderer.Clear();
+
+            var node = new ImmlDocumentSceneNode();
+            node.Initialise(immlDocument, _DeviceManager);
+            
+            _ContextRenderer.Add(node);
         }
 
         private async void _SaveFile()
@@ -130,8 +124,86 @@ namespace MetroImml
 
                 App.ViewModel.SelectedDocument = new ImmlDocumentViewModel(immlDocument);
 
-                _ContextRenderer.Initialise(immlDocument);
+                _ContextRenderer.Clear();
+
+                var node = new ImmlDocumentSceneNode();
+                node.Initialise(immlDocument, _DeviceManager);
+
+                _ContextRenderer.Add(node);
+
+                //TODO: refactor this out somewhere
+                var nestedElements = immlDocument.Elements.AsRecursiveEnumerable();
+
+                foreach (var element in nestedElements)
+                {
+                    if (element is Primitive)
+                    {
+                        var nestedNode = new PrimitiveSceneNode();
+                        nestedNode.Initialise(element, _DeviceManager);
+
+                        _ContextRenderer.Add(nestedNode);
+                    }
+                }
             }
+        }
+
+        private void RenderTarget_Loaded(object sender, RoutedEventArgs e)
+        {
+            var pixelWidth = (int)(this.RenderTarget.ActualWidth * DisplayProperties.LogicalDpi / 96.0);
+            var pixelHeight = (int)(this.RenderTarget.ActualHeight * DisplayProperties.LogicalDpi / 96.0);
+
+            _SurfaceImageSourceTarget = new SurfaceImageSourceTarget(pixelWidth, pixelHeight);
+            _SurfaceImageSourceTarget.OnRender += _SurfaceImageSourceTarget_OnRender;
+            _D3dBrush.ImageSource = _SurfaceImageSourceTarget.ImageSource;
+
+            _DeviceManager.OnInitialize += _DeviceManager_OnInitialize;
+
+            _DeviceManager.Initialize(DisplayProperties.LogicalDpi);
+
+            Windows.UI.Xaml.Media.CompositionTarget.Rendering += CompositionTarget_Rendering;
+
+            DisplayProperties.LogicalDpiChanged += DisplayProperties_LogicalDpiChanged;
+        }
+
+        private PointerPoint _LastPointerLocation;
+
+        private void Grid_PointerMoved_1(object sender, PointerRoutedEventArgs e)
+        {
+            if (_LastPointerLocation == null)
+            {
+                return;
+            }
+
+            //just pan along the x and y axis for now
+            var newPointerLocation = e.GetCurrentPoint(sender as UIElement);
+
+            var xDelta = (float)(newPointerLocation.Position.X - _LastPointerLocation.Position.X);
+            var yDelta = (float)(newPointerLocation.Position.Y - _LastPointerLocation.Position.Y);
+
+            var camera = App.ViewModel.SelectedDocument.Document.GetActiveCamera();
+
+            if (camera == null)
+            {
+                //go direct to the targetview
+            }
+            else
+            {
+                camera.Position = new Imml.Numerics.Vector3(camera.Position.X + xDelta, camera.Position.Y + yDelta, camera.Position.Z);
+            }
+
+            _LastPointerLocation = newPointerLocation;
+        }
+
+        private void Grid_PointerReleased_1(object sender, PointerRoutedEventArgs e)
+        {
+            //stop tracking movement
+            _LastPointerLocation = null;
+        }
+
+        private void Grid_PointerPressed_1(object sender, PointerRoutedEventArgs e)
+        {
+            //start tracking movement
+            _LastPointerLocation = e.GetCurrentPoint(sender as UIElement);
         }
     }
 }

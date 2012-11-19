@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Imml.Scene.Container;
 using MetroImml.Common;
 using Windows.Storage;
+using MetroImml.Framework.Components;
 
 namespace MetroImml.ViewModel
 {
@@ -49,6 +50,14 @@ namespace MetroImml.ViewModel
         {
             get { return _Document; }
             private set { base.SetProperty(ref _Document, value); }
+        }
+
+        private TargetView _TargetView;
+
+        public TargetView TargetView
+        {
+            get { return _TargetView; }
+            set { base.SetProperty(ref _TargetView, value); }
         }
 
         public ImmlDocumentViewModel(ImmlDocument document)
