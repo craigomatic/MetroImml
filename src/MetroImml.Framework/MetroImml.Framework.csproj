@@ -101,9 +101,12 @@
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="Components\ImmlContextRenderer.cs" />
-    <Compile Include="Components\PrimitiveRenderer.cs" />
-    <Compile Include="DocumentRenderStrategy.cs" />
+    <Compile Include="BindableBase.cs" />
+    <Compile Include="Components\ImmlDocumentSceneNode.cs" />
+    <Compile Include="Components\TargetView.cs" />
+    <Compile Include="Components\PrimitiveSceneNode.cs" />
+    <Compile Include="NumericExtensions.cs" />
+    <Compile Include="RenderStrategy.cs" />
     <Compile Include="ImmlExtensions.cs" />
     <Compile Include="IRenderStrategy.cs" />
     <Compile Include="ISceneNode.cs" />
@@ -131,6 +134,17 @@
     <Reference Include="SharpDX.MediaFoundation">
       <HintPath>..\..\lib\SharpDX\SharpDX.MediaFoundation.dll</HintPath>
     </Reference>
+  </ItemGroup>
+  <ItemGroup />
+  <ItemGroup>
+    <None Include="Resources\Shaders\MiniCube.fx" />
+    <None Include="Resources\Shaders\MiniCubeTexture.fx" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Resources\Shaders\MiniCubeTexture_PS.fxo" />
+    <Content Include="Resources\Shaders\MiniCubeTexture_VS.fxo" />
+    <Content Include="Resources\Shaders\MiniCube_PS.fxo" />
+    <Content Include="Resources\Shaders\MiniCube_VS.fxo" />
   </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '11.0' ">
     <VisualStudioVersion>11.0</VisualStudioVersion>

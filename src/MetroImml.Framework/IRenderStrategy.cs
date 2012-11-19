@@ -6,13 +6,20 @@ using System.Threading.Tasks;
 using CommonDX;
 using Imml;
 using Imml.ComponentModel;
+using MetroImml.Framework.Components;
 
 namespace MetroImml.Framework
 {
-    public interface IRenderStrategy<T> where T : IImmlElement
+    public interface IRenderStrategy
     {
-        T Context { get; set; }
+        TargetView TargetView { get; set; }
 
         void Render(TargetBase target);
+
+        void Add(ISceneNode node);
+        
+        void Remove(ISceneNode node);
+
+        void Clear();
     }
 }
