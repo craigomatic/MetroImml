@@ -33,8 +33,12 @@ namespace MetroImml.Framework.Components
 
             if (camera != null)
             {
-                //TODO: incorporate the requested rotation of the camera into this matrix
-                targetView.View = Matrix.LookAtLH(camera.WorldPosition.ToSharpDxVector(), Vector3.UnitZ, Vector3.UnitY);
+                var lookAt = new Vector3(
+                        (float)Math.Sin(camera.WorldRotation.X) + camera.WorldPosition.X,
+                        camera.WorldPosition.Y,
+                        (float)Math.Cos(camera.WorldRotation.Z) + camera.WorldPosition.Z);
+
+                targetView.View = Matrix.LookAtLH(camera.WorldPosition.ToSharpDxVector(), lookAt, Vector3.UnitY);
             }
         }
     }
