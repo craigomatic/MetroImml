@@ -177,8 +177,8 @@ namespace MetroImml
             //just pan along the x and y axis for now
             var newPointerLocation = e.GetCurrentPoint(sender as UIElement);
 
-            var xDelta = (float)(newPointerLocation.Position.X - _LastPointerLocation.Position.X);
-            var yDelta = (float)(newPointerLocation.Position.Y - _LastPointerLocation.Position.Y);
+            var xDelta = -1 * (float)(newPointerLocation.Position.X - _LastPointerLocation.Position.X) / 50f;
+            var yDelta = (float)(newPointerLocation.Position.Y - _LastPointerLocation.Position.Y) / 50f;
 
             var camera = App.ViewModel.SelectedDocument.Document.GetActiveCamera();
 
