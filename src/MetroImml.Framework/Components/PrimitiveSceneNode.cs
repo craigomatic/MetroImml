@@ -26,8 +26,8 @@ namespace MetroImml.Framework.Components
         public void Initialise(IImmlElement context, DeviceManager deviceManager)
         {
             _Context = context as Primitive;
-
-            SafeDispose(ref _ConstantBuffer);
+            
+            RemoveAndDispose(ref _ConstantBuffer);
 
             var path = Windows.ApplicationModel.Package.Current.InstalledLocation.Path;
 
