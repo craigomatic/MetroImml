@@ -24,6 +24,7 @@ using Windows.UI.Xaml.Navigation;
 using Imml;
 using Imml.Scene.Controls;
 using Windows.UI.Input;
+using Windows.UI.ViewManagement;
 
 // The Blank Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=234238
 
@@ -110,6 +111,11 @@ namespace MetroImml
 
         private async void _OpenFile()
         {
+            if (!ApplicationView.TryUnsnap())
+            {
+                //TODO: handle problem
+            }
+
             var openPicker = new FileOpenPicker();
             openPicker.FileTypeFilter.Add(".imml");
             openPicker.ViewMode = PickerViewMode.List;
@@ -204,6 +210,27 @@ namespace MetroImml
         {
             //start tracking movement
             _LastPointerLocation = e.GetCurrentPoint(sender as UIElement);
+        }
+
+        private void Page_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            if (e.PreviousSize == new Size(0, 0))
+            {
+                return;
+            }
+
+            _D3dBrush.ImageSource = null;
+
+            _SurfaceImageSourceTarget.OnRender -= _SurfaceImageSourceTarget_OnRender;
+
+            var pixelWidth = (int)(this.RenderTarget.ActualWidth * DisplayProperties.LogicalDpi / 96.0);
+            var pixelHeight = (int)(this.RenderTarget.ActualHeight * DisplayProperties.LogicalDpi / 96.0);
+
+            _SurfaceImageSourceTarget = new SurfaceImageSourceTarget(pixelWidth, pixelHeight);
+            _SurfaceImageSourceTarget.OnRender += _SurfaceImageSourceTarget_OnRender;
+            _SurfaceImageSourceTarget.Initialize(_DeviceManager);
+
+            _D3dBrush.ImageSource = _SurfaceImageSourceTarget.ImageSource;
         }
     }
 }
