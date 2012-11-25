@@ -115,7 +115,7 @@ namespace MetroImml.Framework.Components
 
             var time = (float)(_Stopwatch.ElapsedMilliseconds / 1000f);
 
-            var scale = _Context.WorldScale.ToSharpDxVector();
+            var scale = _Context.WorldSize.ToSharpDxVector();
             var rotation = _Context.WorldRotation.ToSharpDxVector();
             var translation = _Context.WorldPosition.ToSharpDxVector();
 
